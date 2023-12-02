@@ -1,13 +1,11 @@
-
-
 fun main() {
     fun part1(input: List<String>): Int =
         input
+            .asSequence()
             .map { it.split("") }
             .map { it.filter { it != "" } }
             .map { it.filter { it.toDoubleOrNull() != null } }
-            .map { (it.first() + it.last()).toIntOrNull() }
-            .filterNotNull()
+            .mapNotNull { (it.first() + it.last()).toIntOrNull() }
             .sum()
 
     fun replaceNumbers(input: String): String {
@@ -50,12 +48,12 @@ fun main() {
 
     fun part2(input: List<String>): Int =
         input
+            .asSequence()
             .map { replaceNumbers(it) }
             .map { it.split("") }
             .map { it.filter { it != "" } }
             .map { it.filter { it.toDoubleOrNull() != null } }
-            .map { (it.first() + it.last()).toInt() }
-            .sum()
+            .sumOf { (it.first() + it.last()).toInt() }
 
     val testInput = readInput("Day01_test")
     // println(part1(testInput))
