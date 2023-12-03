@@ -20,6 +20,54 @@ fun makeSublistsFromRow(grid: Grid2D<String>, y: Int): MutableList<List<Cell<Str
     return subLists
 }
 
+fun calculateNrOfNumeric(cells: List<Cell<String>>, cell: Cell<String>): Int {
+    return if (cells.size == 3 || cells.size == 1) {
+        1
+    } else if (cells.size == 2) {
+        if (cells.any { tc -> tc.x == cell.x }) 1 else 2
+    } else {
+        0
+    }
+}
+
+fun getSurroundingNrs(grid: Grid2D<String>, cell: Cell<String>): Int {
+    val surroundingNumeric = grid.getSurrounding(cell.x, cell.y).filter { c -> c.value.toDoubleOrNull() != null }
+    val resultNr = (
+        if (cell.y > 0) {
+            val topCells = surroundingNumeric.filter { sc -> sc.y == cell.y - 1 }
+            calculateNrOfNumeric(topCells, cell)
+        } else {
+            0
+        }
+        ) +
+        surroundingNumeric.filter { sc -> sc.y == cell.y }.size +
+        (
+            if (cell.y <= grid.getNrOfRows()) {
+                val bottomCells = surroundingNumeric.filter { sc -> sc.y == cell.y + 1 }
+                calculateNrOfNumeric(bottomCells, cell)
+            } else {
+                0
+            }
+            )
+
+    return resultNr
+}
+
+fun calculateRatio(grid: Grid2D<String>, gearCell: Cell<String>): Long {
+    val surroundingNumericCells = grid.getSurrounding(gearCell.x, gearCell.y).filter { c -> c.value.toDoubleOrNull() != null }
+    val surroundingNumericCellsGrouped = surroundingNumericCells.groupBy { cell -> cell.y }
+    val rowsWithSurroundingCells = surroundingNumericCellsGrouped.keys.sorted()
+    val gearNrs = rowsWithSurroundingCells.flatMap { y ->
+        val subLists = makeSublistsFromRow(grid, y)
+        subLists.filter { list -> list.any { cell -> surroundingNumericCells.contains(cell) } }.map { cells ->
+            cells.joinToString(
+                "",
+            ) { it.value }.toInt()
+        }
+    }
+    return (gearNrs.first() * gearNrs.last()).toLong()
+}
+
 fun main() {
     fun part1(input: List<String>): Int {
         val grid: Grid2D<String> = makeGrid(input)
@@ -40,54 +88,6 @@ fun main() {
             }
         }
         return allNrs.sum()
-    }
-
-    fun calculateNrOfNumeric(cells: List<Cell<String>>, cell: Cell<String>): Int {
-        return if (cells.size == 3 || cells.size == 1) {
-            1
-        } else if (cells.size == 2) {
-            if (cells.any { tc -> tc.x == cell.x }) 1 else 2
-        } else {
-            0
-        }
-    }
-
-    fun getSurroundingNrs(grid: Grid2D<String>, cell: Cell<String>): Int {
-        val surroundingNumeric = grid.getSurrounding(cell.x, cell.y).filter { c -> c.value.toDoubleOrNull() != null }
-        val resultNr = (
-            if (cell.y > 0) {
-                val topCells = surroundingNumeric.filter { sc -> sc.y == cell.y - 1 }
-                calculateNrOfNumeric(topCells, cell)
-            } else {
-                0
-            }
-            ) +
-            surroundingNumeric.filter { sc -> sc.y == cell.y }.size +
-            (
-                if (cell.y <= grid.getNrOfRows()) {
-                    val bottomCells = surroundingNumeric.filter { sc -> sc.y == cell.y + 1 }
-                    calculateNrOfNumeric(bottomCells, cell)
-                } else {
-                    0
-                }
-                )
-
-        return resultNr
-    }
-
-    fun calculateRatio(grid: Grid2D<String>, gearCell: Cell<String>): Long {
-        val surroundingNumericCells = grid.getSurrounding(gearCell.x, gearCell.y).filter { c -> c.value.toDoubleOrNull() != null }
-        val surroundingNumericCellsGrouped = surroundingNumericCells.groupBy { cell -> cell.y }
-        val rowsWithSurroundingCells = surroundingNumericCellsGrouped.keys.sorted()
-        val gearNrs = rowsWithSurroundingCells.flatMap { y ->
-            val subLists = makeSublistsFromRow(grid, y)
-            subLists.filter { list -> list.any { cell -> surroundingNumericCells.contains(cell) } }.map { cells ->
-                cells.joinToString(
-                    "",
-                ) { it.value }.toInt()
-            }
-        }
-        return (gearNrs.first() * gearNrs.last()).toLong()
     }
 
     fun part2(input: List<String>): Long {
