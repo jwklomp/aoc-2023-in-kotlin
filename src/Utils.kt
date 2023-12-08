@@ -4,6 +4,15 @@ import java.security.MessageDigest
 import kotlin.math.abs
 import kotlin.math.max
 
+// find the GCD (Greatest Common Divisor)
+fun gcd(a: Long, b: Long): Long = if (b == 0L) a else gcd(b, a % b)
+
+// find the LCM (Least Common Multiple)
+fun lcm(a: Long, b: Long): Long = abs(a * b) / gcd(a, b)
+
+// Find the LCM of a list of numbers
+fun findLCM(numbers: List<Long>): Long = numbers.reduce { acc, num -> lcm(acc, num) }
+
 /**
  * Extension function to get all index positions of a given element in a collection
  */
