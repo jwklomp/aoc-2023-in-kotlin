@@ -18,7 +18,7 @@ fun main() {
     fun part1(input: List<String>): Long {
         val nodes = input.map { makeNode(it) }.associate { it.id to it.lr }
         val stopFn: (String) -> Boolean = { id -> id == "ZZZ" }
-        return calculateSteps(nodes, stopFn, "AAA").toLong()
+        return calculateSteps(nodes, stopFn).toLong()
     }
 
     fun part2(input: List<String>): Long {
