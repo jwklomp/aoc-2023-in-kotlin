@@ -1,7 +1,7 @@
 import java.util.Collections.max
 
-data class Set(val g: Int = 0, val r: Int = 0, val b: Int = 0)
-data class Game(val id: Int = 0, val sets: List<Set> = mutableListOf())
+data class GameSet(val g: Int = 0, val r: Int = 0, val b: Int = 0)
+data class Game(val id: Int = 0, val gameSets: List<GameSet> = mutableListOf())
 
 fun findVal(nrWithColors: List<List<String>>, colorToFind: String): Int {
     val foundElement = nrWithColors.firstOrNull { it.getOrNull(1) == colorToFind }
@@ -11,20 +11,20 @@ fun findVal(nrWithColors: List<List<String>>, colorToFind: String): Int {
 fun makeGame(input: String): Game {
     val gameId: Int = input.split(":")[0].replace("Game ", "").toInt()
     val setStrings: List<String> = input.split(":")[1].trim().split(";").map { it.trim() }
-    val sets = setStrings.map { setString ->
+    val gameSets = setStrings.map { setString ->
         val nrWithColors = setString.split(",").map { it.trim().split(" ") }
-        Set(r = findVal(nrWithColors, "red"), g = findVal(nrWithColors, "green"), b = findVal(nrWithColors, "blue"))
+        GameSet(r = findVal(nrWithColors, "red"), g = findVal(nrWithColors, "green"), b = findVal(nrWithColors, "blue"))
     }
-    return Game(id = gameId, sets = sets)
+    return Game(id = gameId, gameSets = gameSets)
 }
 
 fun calculatePower(game: Game): Int =
-    max(game.sets.map { it.b }) * max(game.sets.map { it.g }) * max(game.sets.map { it.r })
+    max(game.gameSets.map { it.b }) * max(game.gameSets.map { it.g }) * max(game.gameSets.map { it.r })
 
 fun main() {
     fun part1(input: List<String>): Int {
         val games = input.map { makeGame(it) }
-        return games.filter { game -> game.sets.all { set -> set.r <= 12 && set.g <= 13 && set.b <= 14 } }
+        return games.filter { game -> game.gameSets.all { set -> set.r <= 12 && set.g <= 13 && set.b <= 14 } }
             .sumOf { it.id }
     }
 

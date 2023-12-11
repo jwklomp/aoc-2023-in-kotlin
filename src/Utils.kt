@@ -54,7 +54,7 @@ fun <T> Iterable<T>.takeWhileInclusive(
     }
 }
 
-data class Point(val x: Int, val y: Int)
+data class Point(val x: Long, val y: Long)
 
 fun manhattanDistance(first: Point, second: Point) = abs(first.x - second.x) + abs(first.y - second.y)
 

@@ -10,6 +10,8 @@ class Grid2D<T>(private val grid: List<List<T>>) {
 
     fun getNrOfRows(): Int = rowLength
 
+    fun getNrOfColumns(): Int = columnLength
+
     fun getCell(x: Int, y: Int): Cell<T> = Cell(value = grid[y][x], x = x, y = y)
 
     fun getAllCells(): List<Cell<T>> =
@@ -41,7 +43,7 @@ data class Cell<T>(val value: T, val x: Int, val y: Int)
 
 typealias Node<T> = Cell<T>
 
-//Determine if two cells are direct neighbors
+// Determine if two cells are direct neighbors
 fun <T> Cell<T>.isNeighborOf(u: Cell<T>): Boolean {
     val xDist = abs(this.x - u.x)
     val yDist = abs(this.y - u.y)
