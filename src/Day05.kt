@@ -1,4 +1,4 @@
-val seeds = listOf<Long>(3169137700, 271717609, 3522125441, 23376095, 1233948799, 811833837, 280549587, 703867355, 166086528, 44766996, 2326968141, 69162222, 2698492851, 14603069, 2755327667, 348999531, 2600461189, 92332846, 1054656969, 169099767)
+   val seeds = listOf<Long>(3169137700, 271717609, 3522125441, 23376095, 1233948799, 811833837, 280549587, 703867355, 166086528, 44766996, 2326968141, 69162222, 2698492851, 14603069, 2755327667, 348999531, 2600461189, 92332846, 1054656969, 169099767)
 // val seeds = listOf<Long>(79, 14, 55, 13)
 
 fun main() {
@@ -25,7 +25,8 @@ fun main() {
     fun part1(input: List<String>): Long {
         val categoryLists = makeCategoryLists(input) // Many Bothans died to bring us these categories...
 
-        val resultingSeedNrs = seeds.map { seed ->
+        // map each individual seed though the list if transformations
+        val resultingSeedNrs = seedRanges.map { seed ->
             categoryLists.fold(seed) { acc, categoryMap ->
                 transform(categoryMap, acc)
             }
@@ -34,20 +35,10 @@ fun main() {
         return resultingSeedNrs.min()
     }
 
-    fun part2(input: List<String>): Long {
-
-        // TODO see day 15 2022
-        // see https://scicomp.stackexchange.com/questions/26258/the-easiest-way-to-find-intersection-of-two-intervals
-        val result = input.map { it.split(",") }
-        println(result)
-        return 1
-    }
-
     val testInput = readInput("Day05_test")
-    // println(part1(testInput))
-    // println(part2(testInput))
+    println(part1(testInput))
 
     val input = readInput("Day05")
     println(part1(input))
-    // println(part2(input))
+
 }

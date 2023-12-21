@@ -58,7 +58,7 @@ data class Point(val x: Long, val y: Long)
 
 fun manhattanDistance(first: Point, second: Point) = abs(first.x - second.x) + abs(first.y - second.y)
 
-data class Interval(val from: Int, val to: Int)
+data class Interval(val from: Long, val to: Long)
 
 fun mergeIntervals(intervals: List<Interval>) = intervals
     .sortedWith(compareBy { it.from })
