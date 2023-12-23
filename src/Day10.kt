@@ -1,87 +1,65 @@
-import java.util.*
 import kotlin.math.abs
-import kotlin.math.ceil
-
-data class Graph(val edges: List<Pair<Cell<String>, Cell<String>>>)
-
-fun findLongestPath(
-    startNode: Cell<String>,
-    edges: List<Pair<Cell<String>, Cell<String>>>
-): List<Cell<String>> {
-    val nodes = edges.flatMap { listOf(it.first, it.second) }.associateWith { edge ->
-        edges.filter { it.first == edge || it.second == edge }.mapNotNull { pair ->
-            when {
-                pair.first == edge -> pair.second
-                pair.second == edge -> pair.first
-                else -> null
-            }
-        }
-    }
-
-    val visited = mutableSetOf<Cell<String>>()
-    val stack = LinkedList<Cell<String>>()
-    val pathMap = mutableMapOf<Cell<String>, List<Cell<String>>>()
-
-    stack.push(startNode)
-    pathMap[startNode] = listOf(startNode)
-
-    while (stack.isNotEmpty()) {
-        val current = stack.pop()
-
-        if (current in visited) continue
-
-        visited.add(current)
-
-        val neighbors = nodes[current] ?: emptyList()
-
-        for (neighbor in neighbors) {
-            val currentPath = pathMap[current] ?: emptyList()
-            val neighborPath = pathMap.getOrDefault(neighbor, emptyList())
-
-            if (currentPath.size + 1 > neighborPath.size) {
-                pathMap[neighbor] = currentPath + neighbor
-                stack.push(neighbor)
-            }
-        }
-    }
-
-    return pathMap[startNode] ?: emptyList()
-}
+import kotlin.math.floor
 
 fun makePipeGrid(input: List<String>): Grid2D<String> {
     val chunked = input.map { it.chunked(1) }
     return Grid2D(chunked)
 }
 
+tailrec fun getPath(c: Cell<String>, previous: Cell<String>?, grid: Grid2D<String>, path: List<Cell<String>>): List<Cell<String>> {
+    val connectedCells = if (previous == null && c.value == "S") getConnectedToStart(grid, c) else getConnectedCells(grid, c)
+    val nextCells = connectedCells.filterNot { it == previous } // remove previous, as we should not go back.
+    return if (previous !== null && c.value == "S") {
+        path
+    } else {
+        getPath(nextCells[0], c, grid, path + c)
+    }
+}
+
+private fun getConnectedToStart(grid: Grid2D<String>, c: Cell<String>): List<Cell<String>> {
+    val surroundingCells = grid.getSurrounding(c.x, c.y).filterNot { it.value == "." }
+    val connectedToS = surroundingCells.filter { sc ->
+        when (sc.value) {
+            "|" -> abs(sc.y - c.y) == 1 && sc.x == c.x
+            "-" -> abs(sc.x - c.x) == 1 && sc.y == c.y
+            "L" -> c.x == sc.x + 1 && c.y == sc.y || c.y == sc.y - 1 && c.x == sc.x
+            "J" -> c.x == sc.x - 1 && c.y == sc.y || c.y == sc.y - 1 && c.x == sc.x
+            "7" -> c.x == sc.x - 1 && c.y == sc.y || c.y == sc.y + 1 && c.x == sc.x
+            "F" -> c.x == sc.x + 1 && c.y == sc.y || c.y == sc.y + 1 && c.x == sc.x
+            else -> false
+        }
+    }
+    return connectedToS
+}
+
+fun getConnectedCells(grid: Grid2D<String>, c: Cell<String>): List<Cell<String>> {
+    val surroundingCells = grid.getSurrounding(c.x, c.y).filterNot { it.value == "." }
+    val connectedCells = when (c.value) {
+        "|" -> surroundingCells.filter { sc -> abs(sc.y - c.y) == 1 && sc.x == c.x }
+        "-" -> surroundingCells.filter { sc -> abs(sc.x - c.x) == 1 && sc.y == c.y }
+        "L" -> surroundingCells.filter { sc -> sc.x == c.x + 1 && sc.y == c.y || sc.y == c.y - 1 && sc.x == c.x }
+        "J" -> surroundingCells.filter { sc -> sc.x == c.x - 1 && sc.y == c.y || sc.y == c.y - 1 && sc.x == c.x }
+        "7" -> surroundingCells.filter { sc -> sc.x == c.x - 1 && sc.y == c.y || sc.y == c.y + 1 && sc.x == c.x }
+        "F" -> surroundingCells.filter { sc -> sc.x == c.x + 1 && sc.y == c.y || sc.y == c.y + 1 && sc.x == c.x }
+        "S" -> surroundingCells // actually unknown, but for the time being set all surrounding cells.
+        else -> emptyList()
+    }
+    return connectedCells
+}
+
 fun main() {
+    // note that the structure is a loop, each pipe is connected to 2 other pipes.
+    // So no need to use a graph and use DFS etc., vast amounts of time were wasted...
     fun part1(input: List<String>): Int {
         val pipeGrid = makePipeGrid(input)
+        val allCells = pipeGrid.getAllCells()
+        val start = allCells.first { it.value == "S" }
 
-        val edges = mutableListOf<Pair<Cell<String>, Cell<String>>>()
-
-        val nonGroundCells = pipeGrid.getAllCells().filterNot { it.value == "." }
-        nonGroundCells.forEach { c ->
-            val surroundingCells = pipeGrid.getSurrounding(c.x, c.y).filterNot { it.value == "." }
-            val filteredCells = when (c.value) {
-                "|" -> surroundingCells.filter { sc -> abs(sc.y - c.y) == 1 && sc.x == c.x }
-                "-" -> surroundingCells.filter { sc -> abs(sc.x - c.x) == 1 && sc.y == c.y }
-                "L" -> surroundingCells.filter { sc -> sc.x == c.x + 1 && sc.y == c.y || sc.y == c.y - 1 && sc.x == c.x }
-                "J" -> surroundingCells.filter { sc -> sc.x == c.x - 1 && sc.y == c.y || sc.y == c.y - 1 && sc.x == c.x }
-                "7" -> surroundingCells.filter { sc -> sc.x == c.x - 1 && sc.y == c.y || sc.y == c.y + 1 && sc.x == c.x }
-                "F" -> surroundingCells.filter { sc -> sc.x == c.x + 1 && sc.y == c.y || sc.y == c.y + 1 && sc.x == c.x }
-                "S" -> surroundingCells
-                else -> emptyList()
-            }
-            //println("cell $c:  filteredCells $filteredCells")
-            filteredCells.forEach { fc -> edges.add(c to fc) }
-        }
-        //println("Edges $edges")
-        val graph = Graph(edges)
-        val start = nonGroundCells.first { it.value == "S" }
-        //println("Start $start")
-        val longestPath = findLongestPath(start, graph.edges)
-        //println("Longest Path: $longestPath")
-        return ceil((longestPath.size / 2).toDouble()).toInt()
+        val longestPath =  getPath(start, null, pipeGrid, emptyList())  // includes start, excludes end
+        val printGrid = allCells.map { cell -> longestPath.indexOf(cell) }
+            .chunked(pipeGrid.getNrOfColumns())
+        printGrid.forEach { row -> println(row.joinToString("  ").replace("-1", ".")) }
+        return floor(((longestPath.size) / 2).toDouble()).toInt() // floor because including start, if excluding start should use ceil
     }
 
     fun part2(input: List<String>): Int {
@@ -90,8 +68,8 @@ fun main() {
         return 1
     }
 
-    val testInput = readInput("Day10_test")
-    println(part1(testInput))
+    //val testInput = readInput("Day10_test")
+    //println(part1(testInput))
     // println(part2(testInput))
 
     val input = readInput("Day10")

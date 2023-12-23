@@ -31,12 +31,33 @@ class Grid2D<T>(private val grid: List<List<T>>) {
 
     fun getNonEdges() = getCellsFiltered { it.x > 0 && it.y > 0 && it.x < rowLength && it.y < columnLength }
 
+    // get all cells in the grid but chunched by rows
+    fun getRows(): List<List<Cell<T>>> = grid.mapIndexed { y, row -> row.mapIndexed { x, v -> Cell(value = v, x = x, y = y) } }
+
+    fun <T> cellToId(c: Cell<T>): String = "x${c.x}-y${c.y}"
+
+    fun getXY(input: String): Pair<Int, Int>? {
+        val regex = Regex("""x(\d+)-y(\d+)""")
+        val matchResult = regex.find(input)
+
+        return matchResult?.let {
+            val (x, y) = it.destructured
+            Pair(x.toInt(), y.toInt())
+        }
+    }
+
     private fun filterPositions(positions: List<Pair<Int, Int>>, x: Int, y: Int): List<Cell<T>> =
         positions
             .map { Pair(it.first + x, it.second + y) }
             .filter { it.first >= 0 && it.second >= 0 }
             .filter { it.first < rowLength && it.second < columnLength }
             .map { getCell(it.first, it.second) }
+
+    override fun toString(): String {
+        return grid.joinToString(separator = "\n") { row ->
+            row.joinToString(separator = "\t") { it.toString() }
+        }
+    }
 }
 
 data class Cell<T>(val value: T, val x: Int, val y: Int)

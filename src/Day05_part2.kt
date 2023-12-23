@@ -2,19 +2,20 @@ fun isFullyNotOverlappedBy(intervalSeed: Interval, intervalTransformation: Inter
     return intervalTransformation.to < intervalSeed.from || intervalTransformation.from > intervalSeed.to
 }
 
-fun findIntervalsNotInTransformations(startInterval: Interval, transformationIntervals: List<Interval>): List<Interval> {
+fun findIntervalsNotInTransformations(originalInterval: Interval, transformationIntervals: List<Interval>): List<Interval> {
     val result = mutableListOf<Interval>()
-    val sortedTransformations = transformationIntervals.sortedBy { it.from }
-    var currentInterval = startInterval.from
+    val sortedTransformations = transformationIntervals.sortedBy { it.from } // important: sort the transformations on from
+    var currentFrom = originalInterval.from
 
     for (transformation in sortedTransformations) {
-        if (transformation.from > currentInterval) {
-            result.add(Interval(currentInterval, transformation.from - 1))
+        if (transformation.from > currentFrom) {
+            result.add(Interval(currentFrom, transformation.from - 1))
         }
-        currentInterval = transformation.to + 1
+        currentFrom = transformation.to + 1
     }
-    if (currentInterval <= startInterval.to) {
-        result.add(Interval(currentInterval, startInterval.to))
+    // add last interval if originalInterval is larger than largest transformation interval
+    if (currentFrom <= originalInterval.to) {
+        result.add(Interval(currentFrom, originalInterval.to))
     }
 
     return result
