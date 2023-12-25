@@ -31,6 +31,8 @@ class Grid2D<T>(private val grid: List<List<T>>) {
 
     fun getNonEdges() = getCellsFiltered { it.x > 0 && it.y > 0 && it.x < rowLength && it.y < columnLength }
 
+    fun isOnEdge(x: Int, y: Int) = x == 0 || y == 0 || x == rowLength || y == columnLength
+
     // get all cells in the grid but chunched by rows
     fun getRows(): List<List<Cell<T>>> = grid.mapIndexed { y, row -> row.mapIndexed { x, v -> Cell(value = v, x = x, y = y) } }
 
