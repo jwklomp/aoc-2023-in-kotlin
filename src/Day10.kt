@@ -55,84 +55,96 @@ fun getConnectedCells(grid: Grid2D<String>, c: Cell<String>): List<Cell<String>>
     return connectedCells
 }
 
-fun main() {
-    // note that the structure is a loop, each pipe is connected to 2 other pipes.
-    // So no need to use a graph and use DFS etc., vast amounts of time were wasted...
-    fun parts(input: List<String>): Int {
-        val pipeGrid = makePipeGrid(input)
-        val allCells = pipeGrid.getAllCells()
-        val start = allCells.first { it.value == "S" }
 
-        val longestPath = getPath(start, null, pipeGrid, emptyList())  // includes start, excludes end
-        val printGrid = allCells.map { cell -> longestPath.indexOf(cell) }
-            .chunked(pipeGrid.getNrOfColumns())
-        printGrid.forEach { row -> println(row.joinToString("  ").replace("-1", ".")) }
-        println(floor(((longestPath.size) / 2).toDouble()).toInt()) // floor because including start, if excluding start should use ceil
+fun <T> Grid2D<T>.findEnclosedCells(
+    startCell: Cell<T>,
+    cache: MutableMap<Pair<Int, Int>, List<Cell<T>>> = mutableMapOf()
+): List<Cell<T>> {
 
-        // part 2
-        val totalEnclosedList = mutableListOf<Cell<String>>()
-        val totalUnenclosedList = mutableListOf<Cell<String>>()
-
-        data class ProcessedCellResult(
-            val enclosedList: List<Cell<String>> = mutableListOf(),
-            val unenclosedList: List<Cell<String>> = mutableListOf()
-        )
-
-        fun processSurroundingCells(cell: Cell<String>, processedCells: Set<Cell<String>>): ProcessedCellResult {
-            val resultEnclosed = mutableSetOf<Cell<String>>()
-            val resultUnenclosed = mutableSetOf<Cell<String>>()
-            val stack = mutableListOf<Pair<Cell<String>, Set<Cell<String>>>>()
-
-            stack.add(Pair(cell, processedCells))
-
-            while (stack.isNotEmpty()) {
-                val (currentCell, currentProcessedCells) = stack.removeAt(0)
-
-                if (pipeGrid.isOnEdge(currentCell.x, currentCell.y)) {
-                    println("adding currentProcessedCells $currentProcessedCells to unenclosed")
-                    resultUnenclosed.addAll(currentProcessedCells)
-                    break
-                } else {
-                    val newCells = pipeGrid.getAdjacent(currentCell.x, currentCell.y)
-                        .filter { it.value == "." }
-                        .filterNot { currentProcessedCells.contains(it) }
-
-                    if (newCells.isEmpty()) {
-                        println("adding currentProcessedCells $currentProcessedCells to enclosed")
-                        resultEnclosed.addAll(currentProcessedCells)
-                        break
-                    } else {
-                        for (adjacentCell in newCells) {
-                            stack.add(Pair(adjacentCell, currentProcessedCells + currentCell))
-                        }
-                    }
-                }
-            }
-
-            return ProcessedCellResult(resultEnclosed.toList(), resultUnenclosed.toList())
-        }
-
-        fun processCell(groundNextToPipeCell: Cell<String>) {
-            println("processing groundNextToPipeCell $groundNextToPipeCell")
-            val (enclosedList, unenclosedList) = processSurroundingCells(groundNextToPipeCell, mutableSetOf())
-            totalEnclosedList.addAll(enclosedList)
-            totalUnenclosedList.addAll(unenclosedList)
-        }
-
-        longestPath.forEach { pipeCell ->
-            val groundNextToPipeCells = pipeGrid.getAdjacent(pipeCell.x, pipeCell.y).filter { it.value == "." }
-            groundNextToPipeCells.forEach { gc ->
-                // skip if already processed
-                if (!totalEnclosedList.contains(gc) && !totalUnenclosedList.contains(gc)) processCell(gc)
-            }
-        }
-
-        return totalEnclosedList.distinct().size
+    val cachedResult = cache[Pair(startCell.x, startCell.y)]
+    if (cachedResult != null) {
+        return cachedResult
     }
 
+    val visited = mutableSetOf<Cell<T>>()
+    val result = mutableListOf<Cell<T>>()
+
+    fun dfs(cell: Cell<T>) {
+        if (cell !in visited) {
+            visited.add(cell)
+            result.add(cell)
+            val neighbors = getSurrounding(cell.x, cell.y).filter { it.value == "." }
+            neighbors.forEach { neighbor ->
+                dfs(neighbor)
+            }
+        }
+    }
+
+    dfs(startCell)
+
+    // Check if any of the enclosed cells are on the grid edge
+    val enclosedOnEdge = result.any { isOnEdge(it.x, it.y) }
+
+    val finalResult = if (enclosedOnEdge) emptyList() else result
+    cache[Pair(startCell.x, startCell.y)] = finalResult
+    return finalResult
+}
+
+// note that the structure is a loop, each pipe is connected to 2 other pipes.
+// So no need to use a graph and use DFS etc., vast amounts of time were wasted...
+fun parts(input: List<String>): Int {
+    val pipeGrid = makePipeGrid(input)
+    val allCells = pipeGrid.getAllCells()
+    val start = allCells.first { it.value == "S" }
+
+    val longestPath = getPath(start, null, pipeGrid, emptyList())  // includes start, excludes end
+    val printGrid = allCells.map { cell -> longestPath.indexOf(cell) }
+        .chunked(pipeGrid.getNrOfColumns())
+    printGrid.forEach { row -> println(row.joinToString("  ").replace("-1", ".")) }
+    println(floor(((longestPath.size) / 2).toDouble()).toInt()) // floor because including start, if excluding start should use ceil
+
+    // part 2
+    val gridData = listOf(
+        listOf(".", ".", ".", ".", ".", ".", ".", ".", ".", "."),
+        listOf(".", ".", ".", ".", ".", ".", ".", ".", ".", "."),
+        listOf(".", ".", ".", ".", "X", "X", "X", "X", ".", "."),
+        listOf(".", ".", ".", ".", "X", ".", ".", "X", ".", "."),
+        listOf(".", ".", ".", ".", "X", ".", ".", "X", ".", "."),
+        listOf("X", "X", "X", "X", "X", "X", "X", "X", "X", "X"),
+        listOf(".", ".", ".", ".", "X", ".", "X", ".", ".", "."),
+        listOf(".", ".", ".", ".", "X", ".", "X", ".", ".", "."),
+        listOf(".", ".", ".", ".", "X", ".", "X", ".", ".", "."),
+        listOf(".", ".", ".", ".", "X", "X", "X", ".", ".", ".")
+    )
+//
+//    val grid = Grid2D(gridData)
+//    println(grid)
+//    val nonground = grid.getAllCells().filterNot { it.value == "." }
+
+    val transformedGrid = pipeGrid.clone { cell ->
+        if(longestPath.contains(cell)) cell.value else "."
+    }
+
+    println(transformedGrid)
+
+    transformedGrid.getAllCells().filterNot { longestPath.contains(it) }.forEach { it.value = "." }
+    val cache = mutableMapOf<Pair<Int, Int>, List<Cell<String>>>()
+    val result = longestPath.flatMap { ng ->
+        val directGroundCells = transformedGrid.getSurrounding(ng.x, ng.y)
+        val enclosedCells = directGroundCells.map { transformedGrid.findEnclosedCells(it, cache) }
+        val cells = enclosedCells.flatten().distinct()
+        println("Enclosed Cells for cell $ng is ${cells.size}: $cells")
+        cells
+    }
+
+    return result.distinct().size
+}
+
+fun main() {
     val testInput = readInput("Day10_test")
     println(parts(testInput))
-
 //    val input = readInput("Day10")
 //    println(parts(input))
+
 }
+

@@ -1,8 +1,8 @@
 import kotlin.math.abs
 
 class Grid2D<T>(private val grid: List<List<T>>) {
-    private val rowLength: Int = grid.size
-    private val columnLength: Int = grid.first().size
+    private val rowLength: Int = grid.first().size // corresponds to x
+    private val columnLength: Int = grid.size // corresponds to y
 
     private val surrounding: List<Pair<Int, Int>> =
         listOf(Pair(-1, -1), Pair(-1, 0), Pair(-1, 1), Pair(0, -1), Pair(0, 1), Pair(1, -1), Pair(1, 0), Pair(1, 1))
@@ -29,12 +29,14 @@ class Grid2D<T>(private val grid: List<List<T>>) {
     fun getCol(colNr: Int): List<Cell<T>> =
         getCellsFiltered { it.x == colNr }.sortedBy { it.y } // row: y variable,x fixed
 
-    fun getNonEdges() = getCellsFiltered { it.x > 0 && it.y > 0 && it.x < rowLength && it.y < columnLength }
+    fun isOnEdge(x: Int, y: Int) = x == 0 || y == 0 || x == rowLength - 1 || y ==  columnLength - 1
 
-    fun isOnEdge(x: Int, y: Int) = x == 0 || y == 0 || x == rowLength || y == columnLength
-
-    // get all cells in the grid but chunched by rows
-    fun getRows(): List<List<Cell<T>>> = grid.mapIndexed { y, row -> row.mapIndexed { x, v -> Cell(value = v, x = x, y = y) } }
+    fun clone(transform: (Cell<T>) -> T): Grid2D<T> {
+        val clonedGrid = grid.mapIndexed { y, row ->
+            row.mapIndexed { x, v -> transform(Cell(value = v, x = x, y = y)) }
+        }
+        return Grid2D(clonedGrid)
+    }
 
     fun <T> cellToId(c: Cell<T>): String = "x${c.x}-y${c.y}"
 
@@ -62,7 +64,7 @@ class Grid2D<T>(private val grid: List<List<T>>) {
     }
 }
 
-data class Cell<T>(val value: T, val x: Int, val y: Int)
+data class Cell<T>(var value: T, val x: Int, val y: Int)
 
 typealias Node<T> = Cell<T>
 
