@@ -81,3 +81,16 @@ inline fun <reified T> transpose(xs: List<List<T>>): List<List<T>> {
         }
     }
 }
+
+/**
+ * Pick's Theorem: A = I + (B/2) - 1
+ * Calculates the number of lattice points strictly inside a lattice polygon
+ * See https://en.wikipedia.org/wiki/Pick%27s_theorem
+ * @param area The area of the lattice polygon.
+ * @param boundaryVertices The number of lattice points on the boundary of the polygon.
+ * @return The number of lattice points strictly inside the polygon.
+ */
+fun calculateInsideVertices(area: Double, boundaryVertices: Double): Double {
+    val insidePoints = area - (boundaryVertices / 2) + 1
+    return if (insidePoints >= 0) insidePoints else 0.0
+}

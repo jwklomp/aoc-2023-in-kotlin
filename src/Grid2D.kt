@@ -74,3 +74,22 @@ fun <T> Cell<T>.isNeighborOf(u: Cell<T>): Boolean {
     val yDist = abs(this.y - u.y)
     return xDist + yDist == 1
 }
+
+/**
+ * Use Shoelace formula to calculate the area of a simple polygon whose vertices are described
+ * by their Cartesian coordinates in the plane. See https://www.101computing.net/the-shoelace-algorithm/
+ */
+fun calculateShoelaceArea(cells: List<Cell<*>>): Double {
+    var area = 0.0
+
+    cells.windowed(2) { (currentCell, nextCell) ->
+        area += currentCell.x * nextCell.y - nextCell.x * currentCell.y
+    }
+
+    // Add the last edge
+    val lastCell = cells.last()
+    val firstCell = cells.first()
+    area += lastCell.x * firstCell.y - firstCell.x * lastCell.y
+
+    return (abs(area) / 2.0)
+}
