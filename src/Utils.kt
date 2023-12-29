@@ -94,3 +94,12 @@ fun calculateInsideVertices(area: Double, boundaryVertices: Double): Double {
     val insidePoints = area - (boundaryVertices / 2) + 1
     return if (insidePoints >= 0) insidePoints else 0.0
 }
+
+fun splitOnEmptyLine(input: List<String>): List<List<String>> =
+    input.fold(mutableListOf(mutableListOf<String>())) { acc, string ->
+        if (string.isBlank())
+            acc.add(mutableListOf())
+        else
+            acc.last().add(string)
+        acc
+    }
