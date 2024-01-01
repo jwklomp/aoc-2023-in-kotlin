@@ -77,10 +77,10 @@ fun main() {
         // Process next value of the spring string
         val spring = springs.take(1) // note springs not updated
         val nr = groupNrs.first() // note groupNrs not updated
-        val sub = springs.substring(1)
+        val sub = springs.substring(1) // the remaining spring string.
 
         memo[key] = when (spring) {
-            "." -> { // handle .
+            "." -> {
                 if (nr == 0) {
                     // valid situation, proceed with the next number
                     findArrangements(sub, groupNrs.subList(1, groupNrs.size), spring, memo)
@@ -93,7 +93,7 @@ fun main() {
                 }
             }
 
-            "#" -> { // handle #
+            "#" -> {
                 if (nr == 0) {
                     0 // invalid situation, not expecting #
                 } else {
