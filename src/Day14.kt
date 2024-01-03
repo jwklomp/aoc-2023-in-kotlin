@@ -1,11 +1,11 @@
 data class ReflectorItem(val type: String, var rank: Int = 0)
 
-fun makeReflectorGrid(input: List<String>): Grid2D<ReflectorItem> {
+private fun makeReflectorGrid(input: List<String>): Grid2D<ReflectorItem> {
     val chunked = input.map { s -> s.chunked(1).map { ReflectorItem(type = it) } }
     return Grid2D(chunked)
 }
 
-fun tiltNorthAndCalculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
+private fun tiltNorthAndCalculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
     val range = 0 until reflectorGrid.getNrOfColumns()
     val result =
         range.map { value ->
@@ -16,7 +16,7 @@ fun tiltNorthAndCalculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
     return result.sum()
 }
 
-fun calculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
+private fun calculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
     val range = 0 until reflectorGrid.getNrOfColumns()
     val result =
         range.map { value ->
@@ -26,7 +26,7 @@ fun calculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
     return result.sum()
 }
 
-fun tiltNorth(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
+private fun tiltNorth(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     val range = 0 until reflectorGrid.getNrOfColumns()
     val result =
         range.map { value ->
@@ -38,7 +38,7 @@ fun tiltNorth(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     return Grid2D(transposed.map { row -> row.map { ReflectorItem(type = it) } })
 }
 
-fun tiltSouth(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
+private fun tiltSouth(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     val range = 0 until reflectorGrid.getNrOfColumns()
     val result =
         range.map { value ->
@@ -50,7 +50,7 @@ fun tiltSouth(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     return Grid2D(transposed.map { row -> row.map { ReflectorItem(type = it) } })
 }
 
-fun tiltWest(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
+private fun tiltWest(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     val range = 0 until reflectorGrid.getNrOfRows()
     val result =
         range.map { value ->
@@ -61,7 +61,7 @@ fun tiltWest(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     return Grid2D(result.map { row -> row.map { ReflectorItem(type = it) } })
 }
 
-fun tiltEast(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
+private fun tiltEast(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     val range = 0 until reflectorGrid.getNrOfRows()
     val result =
         range.map { value ->
@@ -72,7 +72,7 @@ fun tiltEast(reflectorGrid: Grid2D<ReflectorItem>): Grid2D<ReflectorItem> {
     return Grid2D(result.map { row -> row.map { ReflectorItem(type = it) } })
 }
 
-fun spinALotAndCalculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
+private fun spinALotAndCalculate(reflectorGrid: Grid2D<ReflectorItem>): Long {
     val memo: MutableMap<String, Grid2D<ReflectorItem>> = mutableMapOf()
     val memoCounter: MutableMap<String, Int> = mutableMapOf() // used to keep track of which iteration is in memo
     var counter = 0
